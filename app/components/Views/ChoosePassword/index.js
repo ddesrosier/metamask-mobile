@@ -20,6 +20,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import AppConstants from '../../../core/AppConstants';
 import OnboardingProgress from '../../UI/OnboardingProgress';
 import zxcvbn from 'zxcvbn';
+import { ONBOARDING, PREVIOUS_SCREEN } from '../../../constants/navigation';
 
 const steps = [strings('choose_password.title'), strings('choose_password.secure'), strings('choose_password.confirm')];
 
@@ -283,8 +284,9 @@ class ChoosePassword extends PureComponent {
 		try {
 			this.setState({ loading: true });
 
-			const previousScreen = this.props.navigation.getParam(AppConstants.PREVIOUS_SCREEN);
-			if (previousScreen === 'onboarding') {
+			const previous_screen = this.props.navigation.getParam(PREVIOUS_SCREEN);
+
+			if (previous_screen === ONBOARDING) {
 				await this.createNewVaultAndKeychain(password);
 				this.props.seedphraseNotBackedUp();
 				await AsyncStorage.removeItem('@MetaMask:nextMakerReminder');
