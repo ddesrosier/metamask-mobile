@@ -19,6 +19,13 @@ import { ANALYTICS_EVENT_OPTS } from '../../../util/analytics';
 import Device from '../../../util/Device';
 import { OutlinedTextField } from 'react-native-material-textfield';
 import BiometryButton from '../../UI/BiometryButton';
+import {
+	PASSCODE_DISABLED,
+	BIOMETRY_CHOICE,
+	BIOMETRY_CHOICE_DISABLED,
+	ONBOARDING_WIZARD,
+	METRICS_OPT_IN
+} from '../../../constants/storage';
 
 const styles = StyleSheet.create({
 	mainWrapper: {
@@ -150,10 +157,10 @@ class Login extends PureComponent {
 			}
 		} else {
 			const biometryType = await SecureKeychain.getSupportedBiometryType();
-			const passcodeDisabled = await AsyncStorage.getItem('@MetaMask:passcodeDisabled');
+			const passcodeDisabled = await AsyncStorage.getItem(PASSCODE_DISABLED);
 			if (passcodeDisabled !== 'true' && biometryType) {
 				let enabled = true;
-				const previouslyDisabled = await AsyncStorage.getItem('@MetaMask:biometryChoiceDisabled');
+				const previouslyDisabled = await AsyncStorage.getItem(BIOMETRY_CHOICE_DISABLED);
 				if (previouslyDisabled && previouslyDisabled === 'true') {
 					enabled = false;
 				}
@@ -198,13 +205,13 @@ class Login extends PureComponent {
 				await SecureKeychain.setGenericPassword('metamask-user', this.state.password, authOptions);
 
 				if (!this.state.biometryChoice) {
-					await AsyncStorage.removeItem('@MetaMask:biometryChoice');
-					await AsyncStorage.setItem('@MetaMask:biometryChoiceDisabled', 'true');
-					await AsyncStorage.setItem('@MetaMask:passcodeDisabled', 'true');
+					await AsyncStorage.removeItem(BIOMETRY_CHOICE);
+					await AsyncStorage.setItem(BIOMETRY_CHOICE_DISABLED, 'true');
+					await AsyncStorage.setItem(PASSCODE_DISABLED, 'true');
 				} else {
-					await AsyncStorage.setItem('@MetaMask:biometryChoice', this.state.biometryType);
-					await AsyncStorage.removeItem('@MetaMask:biometryChoiceDisabled');
-					await AsyncStorage.removeItem('@MetaMask:passcodeDisabled');
+					await AsyncStorage.setItem(BIOMETRY_CHOICE, this.state.biometryType);
+					await AsyncStorage.removeItem(BIOMETRY_CHOICE_DISABLED);
+					await AsyncStorage.removeItem(PASSCODE_DISABLED);
 				}
 			} else {
 				if (this.state.rememberMe) {
@@ -214,13 +221,13 @@ class Login extends PureComponent {
 				} else {
 					await SecureKeychain.resetGenericPassword();
 				}
-				await AsyncStorage.removeItem('@MetaMask:biometryChoice');
+				await AsyncStorage.removeItem(BIOMETRY_CHOICE);
 			}
 
 			// Get onboarding wizard state
-			const onboardingWizard = await AsyncStorage.getItem('@MetaMask:onboardingWizard');
+			const onboardingWizard = await AsyncStorage.getItem(ONBOARDING_WIZARD);
 			// Check if user passed through metrics opt-in screen
-			const metricsOptIn = await AsyncStorage.getItem('@MetaMask:metricsOptIn');
+			const metricsOptIn = await AsyncStorage.getItem(METRICS_OPT_IN);
 			if (!metricsOptIn) {
 				this.props.navigation.navigate('OptinMetrics');
 			} else if (onboardingWizard) {
@@ -262,9 +269,9 @@ class Login extends PureComponent {
 
 	updateBiometryChoice = async biometryChoice => {
 		if (!biometryChoice) {
-			await AsyncStorage.setItem('@MetaMask:biometryChoiceDisabled', 'true');
+			await AsyncStorage.setItem(BIOMETRY_CHOICE_DISABLED, 'true');
 		} else {
-			await AsyncStorage.removeItem('@MetaMask:biometryChoiceDisabled');
+			await AsyncStorage.removeItem(BIOMETRY_CHOICE_DISABLED);
 		}
 		this.setState({ biometryChoice });
 	};
